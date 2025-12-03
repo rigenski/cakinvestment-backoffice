@@ -135,7 +135,7 @@ export default function NewsContainer() {
       title: data.title,
       category: data.category,
       author: data.author,
-      date: new Date(data.date),
+      date: typeof data.date === "string" ? new Date(data.date) : data.date,
       content: data.content,
       id: Date.now().toString(),
       createdAt: new Date(),
@@ -196,7 +196,7 @@ export default function NewsContainer() {
           <Icon icon="lucide:filter" className="mr-2 h-4 w-4" />
           Filter
         </Button>
-        <Button variant="gradient" onClick={() => setIsCreateDialogOpen(true)}>
+        <Button variant="default" onClick={() => setIsCreateDialogOpen(true)}>
           <Icon icon="lucide:plus" className="mr-2 h-4 w-4" />
           Add News
         </Button>

@@ -54,7 +54,7 @@ export function FilterNewsDialog({
                 onCategoryChange(value === "all" ? null : value)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
               <SelectContent>
@@ -71,7 +71,7 @@ export function FilterNewsDialog({
           <Button variant="outline" onClick={handleClear}>
             Clear Filter
           </Button>
-          <Button variant="gradient" onClick={() => onOpenChange(false)}>
+          <Button variant="default" onClick={() => onOpenChange(false)}>
             Apply Filter
           </Button>
         </DialogFooter>
@@ -79,4 +79,3 @@ export function FilterNewsDialog({
     </Dialog>
   );
 }
-

@@ -12,8 +12,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TiptapEditor } from "../tiptap-editor";
-import { News, NewsFormData, NewsCategory } from "../../types";
+import { News, NewsCategory } from "../../types";
 import { useState, useEffect } from "react";
 
 const newsFormSchema = z.object({
@@ -47,31 +54,40 @@ export function EditNewsDialog({
   onSubmit,
 }: EditNewsDialogProps) {
   const [content, setContent] = useState("");
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
-  } = useForm({
-    resolver: zodResolver(newsFormSchema),
-  });
 
-  const category = watch("category");
+  const form = useForm<z.infer<typeof newsFormSchema>>({
+    resolver: zodResolver(newsFormSchema),
+    defaultValues: {
+      title: "",
+      category: "Market Update",
+      author: "",
+      date: "",
+      content: "",
+    },
+  });
 
   useEffect(() => {
     if (news) {
-      setValue("title", news.title);
-      setValue("category", news.category);
-      setValue("author", news.author);
-      setValue("date", news.date.toISOString().split("T")[0]);
+      form.reset({
+        title: news.title,
+        category: news.category,
+        author: news.author,
+        date: news.date.toISOString().split("T")[0],
+        content: news.content,
+      });
       setContent(news.content);
-      setValue("content", news.content);
     }
-  }, [news, setValue]);
+  }, [news, form]);
 
-  const onFormSubmit = (data: any) => {
+  const onOpenChangeHandler = (v: boolean) => {
+    onOpenChange(v);
+    if (!v) {
+      form.reset();
+      setContent("");
+    }
+  };
+
+  const onFormSubmit = (data: z.infer<typeof newsFormSchema>) => {
     if (!news) return;
     onSubmit({
       title: data.title,
@@ -81,109 +97,158 @@ export function EditNewsDialog({
       content: content,
       updatedAt: new Date(),
     });
-    onOpenChange(false);
+    onOpenChangeHandler(false);
   };
 
   if (!news) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChangeHandler}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Edit News</DialogTitle>
           <DialogDescription>Edit berita yang sudah ada.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Judul</Label>
-            <Input
-              id="title"
-              {...register("title")}
-              placeholder="Masukkan judul berita"
-            />
-            {errors.title && (
-              <p className="text-destructive text-sm">{errors.title.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Kategori</Label>
-              <Select
-                value={category}
-                onValueChange={(value) =>
-                  setValue("category", value as NewsCategory)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Market Update">Market Update</SelectItem>
-                  <SelectItem value="Analisis">Analisis</SelectItem>
-                  <SelectItem value="Tips & Trick">Tips & Trick</SelectItem>
-                  <SelectItem value="Lainya">Lainya</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.category && (
-                <p className="text-destructive text-sm">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
-                {...register("author")}
-                placeholder="Masukkan nama author"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onFormSubmit)}
+            className="space-y-4"
+          >
+            <div className="flex flex-col gap-4">
+              {/* Title */}
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Judul<span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Masukkan judul berita"
+                        {...field}
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.author && (
-                <p className="text-destructive text-sm">
-                  {errors.author.message}
-                </p>
-              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Kategori<span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Pilih kategori" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Market Update">
+                              Market Update
+                            </SelectItem>
+                            <SelectItem value="Analisis">Analisis</SelectItem>
+                            <SelectItem value="Tips & Trick">
+                              Tips & Trick
+                            </SelectItem>
+                            <SelectItem value="Lainya">Lainya</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Author */}
+                <FormField
+                  control={form.control}
+                  name="author"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Author<span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Masukkan nama author"
+                          {...field}
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Date */}
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tanggal<span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} required />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Content */}
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Konten<span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <TiptapEditor
+                        content={content}
+                        onChange={(html) => {
+                          setContent(html);
+                          field.onChange(html);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 border-t pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChangeHandler(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="default">
+                  Update News
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="date">Tanggal</Label>
-            <Input id="date" type="date" {...register("date")} />
-            {errors.date && (
-              <p className="text-destructive text-sm">{errors.date.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="content">Konten</Label>
-            <TiptapEditor
-              content={content}
-              onChange={(html) => {
-                setContent(html);
-                setValue("content", html);
-              }}
-            />
-            {errors.content && (
-              <p className="text-destructive text-sm">
-                {errors.content.message}
-              </p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="gradient">
-              Update News
-            </Button>
-          </DialogFooter>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
