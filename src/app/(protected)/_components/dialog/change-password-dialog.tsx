@@ -78,7 +78,7 @@ export default function ChangePasswordDialog({
           <Button variant="outline" onClick={() => onClose(false)}>
             Cancel
           </Button>
-          <Button variant="gradient" onClick={handleSubmit}>
+          <Button variant="default" onClick={handleSubmit}>
             Change Password
           </Button>
         </DialogFooter>
