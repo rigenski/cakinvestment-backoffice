@@ -13,6 +13,7 @@ import { useAuth } from "@/stores/auth";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import ChangePasswordDialog from "./dialog/change-password-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function AppBar() {
   const { user } = useAuth();
@@ -59,14 +60,13 @@ export default function AppBar() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                className="cursor-pointer"
+              <Button
+                variant="ghost"
                 onClick={() => setIsChangePasswordOpen(true)}
               >
                 <Icon icon="lucide:key-round" className="mr-2 h-4 w-4" />
                 <span>Change Password</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              </Button>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
