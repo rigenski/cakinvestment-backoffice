@@ -46,7 +46,9 @@ export default function ResearchContainer() {
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [editingResearch, setEditingResearch] = useState<Research | null>(null);
   const [viewingResearch, setViewingResearch] = useState<Research | null>(null);
-  const [deletingResearch, setDeletingResearch] = useState<Research | null>(null);
+  const [deletingResearch, setDeletingResearch] = useState<Research | null>(
+    null,
+  );
   const [research, setResearch] = useState<Research[]>(mockResearch);
 
   const filteredResearch = research.filter((item) => {
@@ -144,7 +146,10 @@ export default function ResearchContainer() {
       category: data.category,
       author: data.author,
       date: typeof data.date === "string" ? new Date(data.date) : data.date,
-      document: typeof data.document === "string" ? data.document : URL.createObjectURL(data.document),
+      document:
+        typeof data.document === "string"
+          ? data.document
+          : URL.createObjectURL(data.document),
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -177,13 +182,12 @@ export default function ResearchContainer() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="bg-background space-y-6 rounded-lg p-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Research Management</h1>
-        <p className="text-muted-foreground mt-2">
-          Kelola penelitian dan analisis dengan mudah. Tambah, edit, dan hapus
-          dokumen penelitian untuk memberikan informasi terbaru kepada pengguna.
+        <h1 className="text-2xl font-bold">Research Management</h1>
+        <p className="text-muted-foreground">
+          Kelola penelitian dan analisis dengan mudah.
         </p>
       </div>
 
@@ -246,4 +250,3 @@ export default function ResearchContainer() {
     </div>
   );
 }
-

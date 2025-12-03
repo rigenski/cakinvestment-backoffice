@@ -72,6 +72,18 @@ export function ViewNewsDialog({
           </div>
           <div>
             <p className="text-muted-foreground mb-2 text-sm font-medium">
+              Banner
+            </p>
+            {news.banner && (
+              <img
+                src={news.banner}
+                alt={news.title}
+                className="mb-4 h-64 max-w-full rounded-lg border object-cover"
+              />
+            )}
+          </div>
+          <div>
+            <p className="text-muted-foreground mb-2 text-sm font-medium">
               Konten
             </p>
             <div

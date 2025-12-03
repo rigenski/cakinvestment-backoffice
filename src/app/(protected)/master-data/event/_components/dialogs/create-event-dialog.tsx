@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -27,43 +28,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TiptapEditor } from "../tiptap-editor";
-import { NewsFormData, NewsCategory } from "../../types";
+import { EventFormData, EventCategory } from "../../types";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 
-const newsFormSchema = z.object({
+const eventFormSchema = z.object({
   title: z.string().min(1, "Judul harus diisi"),
-  category: z.enum(["Market Update", "Analisis", "Tips & Trick", "Lainya"]),
-  author: z.string().min(1, "Author harus diisi"),
+  speaker: z.string().min(1, "Pembicara harus diisi"),
+  category: z.enum(["gratis", "premium"]),
   date: z.string().min(1, "Tanggal harus diisi"),
-  content: z.string().min(1, "Konten harus diisi"),
+  time: z.string().min(1, "Waktu harus diisi"),
+  registrationLink: z.string().url("Link registrasi harus valid").min(1, "Link registrasi harus diisi"),
   banner: z.any(),
+  description: z.string().min(1, "Deskripsi harus diisi"),
 });
 
-interface CreateNewsDialogProps {
+interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: NewsFormData) => void;
+  onSubmit: (data: EventFormData) => void;
 }
 
-export function CreateNewsDialog({
+export function CreateEventDialog({
   open,
   onOpenChange,
   onSubmit,
-}: CreateNewsDialogProps) {
-  const [content, setContent] = useState("");
+}: CreateEventDialogProps) {
   const [banner, setBanner] = useState<File | null>(null);
 
-  const form = useForm<z.infer<typeof newsFormSchema>>({
-    resolver: zodResolver(newsFormSchema),
+  const form = useForm<z.infer<typeof eventFormSchema>>({
+    resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: "",
-      category: "Market Update",
-      author: "",
+      speaker: "",
+      category: "gratis",
       date: new Date().toISOString().split("T")[0],
-      content: "",
+      time: "",
+      registrationLink: "",
       banner: null,
+      description: "",
     },
   });
 
@@ -71,23 +74,24 @@ export function CreateNewsDialog({
     onOpenChange(v);
     if (!v) {
       form.reset();
-      setContent("");
       setBanner(null);
     }
   };
 
-  const onFormSubmit = (data: z.infer<typeof newsFormSchema>) => {
+  const onFormSubmit = (data: z.infer<typeof eventFormSchema>) => {
     if (!banner) {
       form.setError("banner", { message: "Banner harus diupload" });
       return;
     }
     onSubmit({
       title: data.title,
+      speaker: data.speaker,
       category: data.category,
-      author: data.author,
       date: data.date,
-      content,
+      time: data.time,
+      registrationLink: data.registrationLink,
       banner: banner,
+      description: data.description,
     });
     onOpenChangeHandler(false);
   };
@@ -96,9 +100,9 @@ export function CreateNewsDialog({
     <Dialog open={open} onOpenChange={onOpenChangeHandler}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Create News</DialogTitle>
+          <DialogTitle>Create Event</DialogTitle>
           <DialogDescription>
-            Tambahkan berita baru ke sistem.
+            Tambahkan event baru ke sistem.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -118,7 +122,7 @@ export function CreateNewsDialog({
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Masukkan judul berita"
+                        placeholder="Masukkan judul event"
                         {...field}
                         required
                       />
@@ -129,6 +133,27 @@ export function CreateNewsDialog({
               />
 
               <div className="grid grid-cols-2 gap-4">
+                {/* Speaker */}
+                <FormField
+                  control={form.control}
+                  name="speaker"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Pembicara<span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Masukkan nama pembicara"
+                          {...field}
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Category */}
                 <FormField
                   control={form.control}
@@ -147,14 +172,8 @@ export function CreateNewsDialog({
                             <SelectValue placeholder="Pilih kategori" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Market Update">
-                              Market Update
-                            </SelectItem>
-                            <SelectItem value="Analisis">Analisis</SelectItem>
-                            <SelectItem value="Tips & Trick">
-                              Tips & Trick
-                            </SelectItem>
-                            <SelectItem value="Lainya">Lainya</SelectItem>
+                            <SelectItem value="gratis">Gratis</SelectItem>
+                            <SelectItem value="premium">Premium</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -162,19 +181,39 @@ export function CreateNewsDialog({
                     </FormItem>
                   )}
                 />
+              </div>
 
-                {/* Author */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Date */}
                 <FormField
                   control={form.control}
-                  name="author"
+                  name="date"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Author<span className="text-red-500">*</span>
+                        Tanggal<span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Time */}
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Waktu<span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Masukkan nama author"
+                          type="time"
+                          placeholder="HH:MM"
                           {...field}
                           required
                         />
@@ -185,17 +224,22 @@ export function CreateNewsDialog({
                 />
               </div>
 
-              {/* Date */}
+              {/* Registration Link */}
               <FormField
                 control={form.control}
-                name="date"
+                name="registrationLink"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Tanggal<span className="text-red-500">*</span>
+                      Link Registrasi<span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} required />
+                      <Input
+                        type="url"
+                        placeholder="https://example.com/register"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -230,7 +274,7 @@ export function CreateNewsDialog({
                             <img
                               src={URL.createObjectURL(banner)}
                               alt="Banner preview"
-                              className="h-48 max-w-full rounded-lg border object-cover"
+                              className="max-w-full h-48 object-cover rounded-lg border"
                             />
                           </div>
                         )}
@@ -241,22 +285,21 @@ export function CreateNewsDialog({
                 )}
               />
 
-              {/* Content */}
+              {/* Description */}
               <FormField
                 control={form.control}
-                name="content"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Konten<span className="text-red-500">*</span>
+                      Deskripsi<span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <TiptapEditor
-                        content={content}
-                        onChange={(html) => {
-                          setContent(html);
-                          field.onChange(html);
-                        }}
+                      <Textarea
+                        placeholder="Masukkan deskripsi event"
+                        rows={4}
+                        {...field}
+                        required
                       />
                     </FormControl>
                     <FormMessage />
@@ -274,7 +317,7 @@ export function CreateNewsDialog({
                   Cancel
                 </Button>
                 <Button type="submit" variant="default">
-                  Create News
+                  Create Event
                 </Button>
               </div>
             </div>
@@ -284,3 +327,4 @@ export function CreateNewsDialog({
     </Dialog>
   );
 }
+

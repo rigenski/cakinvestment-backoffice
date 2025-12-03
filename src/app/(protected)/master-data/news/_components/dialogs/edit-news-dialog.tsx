@@ -31,6 +31,7 @@ import {
 import { TiptapEditor } from "../tiptap-editor";
 import { News, NewsCategory } from "../../types";
 import { useState, useEffect } from "react";
+import { Icon } from "@iconify/react";
 
 const newsFormSchema = z.object({
   title: z.string().min(1, "Judul harus diisi"),
@@ -38,6 +39,7 @@ const newsFormSchema = z.object({
   author: z.string().min(1, "Author harus diisi"),
   date: z.string().min(1, "Tanggal harus diisi"),
   content: z.string().min(1, "Konten harus diisi"),
+  banner: z.any(),
 });
 
 interface EditNewsDialogProps {
@@ -54,6 +56,7 @@ export function EditNewsDialog({
   onSubmit,
 }: EditNewsDialogProps) {
   const [content, setContent] = useState("");
+  const [banner, setBanner] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof newsFormSchema>>({
     resolver: zodResolver(newsFormSchema),
@@ -63,6 +66,7 @@ export function EditNewsDialog({
       author: "",
       date: "",
       content: "",
+      banner: null,
     },
   });
 
@@ -74,6 +78,7 @@ export function EditNewsDialog({
         author: news.author,
         date: news.date.toISOString().split("T")[0],
         content: news.content,
+        banner: news.banner,
       });
       setContent(news.content);
     }
@@ -84,6 +89,7 @@ export function EditNewsDialog({
     if (!v) {
       form.reset();
       setContent("");
+      setBanner(null);
     }
   };
 
@@ -95,6 +101,7 @@ export function EditNewsDialog({
       author: data.author,
       date: new Date(data.date),
       content: content,
+      banner: banner ? URL.createObjectURL(banner) : news.banner || "",
       updatedAt: new Date(),
     });
     onOpenChangeHandler(false);
@@ -204,6 +211,58 @@ export function EditNewsDialog({
                     </FormLabel>
                     <FormControl>
                       <Input type="date" {...field} required />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Banner Upload */}
+              <FormField
+                control={form.control}
+                name="banner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Upload Banner</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setBanner(file);
+                              field.onChange(file);
+                            }
+                          }}
+                          className="cursor-pointer"
+                        />
+                        <div>
+                          {banner ? (
+                            <div className="mt-2">
+                              <img
+                                src={URL.createObjectURL(banner)}
+                                alt="Banner preview"
+                                className="h-48 max-w-full rounded-lg border object-cover"
+                              />
+                            </div>
+                          ) : (
+                            news.banner && (
+                              <div className="mt-2">
+                                <p className="text-muted-foreground mb-2 text-sm">
+                                  Banner saat ini:
+                                </p>
+                                <img
+                                  src={news.banner}
+                                  alt="Current banner"
+                                  className="h-48 max-w-full rounded-lg border object-cover"
+                                />
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

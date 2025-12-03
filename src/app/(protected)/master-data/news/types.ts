@@ -7,6 +7,7 @@ export interface News {
   author: string;
   date: Date;
   content: string; // HTML content from Tiptap
+  banner: string; // URL or file path
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,5 +18,6 @@ export interface NewsFormData {
   author: string;
   date: string;
   content: string;
+  banner: File | string;
 }
 

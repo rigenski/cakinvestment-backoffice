@@ -6,60 +6,65 @@ import { Input } from "@/components/ui/input";
 import { Icon } from "@iconify/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { News, NewsFormData } from "../types";
-import { CreateNewsDialog } from "./dialogs/create-news-dialog";
-import { DeleteNewsDialog } from "./dialogs/delete-news-dialog";
-import { EditNewsDialog } from "./dialogs/edit-news-dialog";
-import { FilterNewsDialog } from "./dialogs/filter-news-dialog";
-import { ViewNewsDialog } from "./dialogs/view-news-dialog";
+import { Event, EventFormData } from "../types";
+import { CreateEventDialog } from "./dialogs/create-event-dialog";
+import { DeleteEventDialog } from "./dialogs/delete-event-dialog";
+import { EditEventDialog } from "./dialogs/edit-event-dialog";
+import { FilterEventDialog } from "./dialogs/filter-event-dialog";
+import { ViewEventDialog } from "./dialogs/view-event-dialog";
 
 // Mock data - replace with actual API call
-const mockNews: News[] = [
+const mockEvents: Event[] = [
   {
     id: "1",
-    title: "Market Update: Analisis Pasar Saham Hari Ini",
-    category: "Market Update",
-    author: "John Doe",
-    date: new Date("2025-01-15"),
-    content: "<p>Konten berita lengkap...</p>",
-    banner: "/banners/news-1.jpg",
+    title: "Webinar Investasi untuk Pemula",
+    speaker: "John Doe",
+    category: "gratis",
+    date: new Date("2025-02-15"),
+    time: "10:00",
+    registrationLink: "https://example.com/register/1",
+    banner: "/banners/event-1.jpg",
+    description: "Webinar tentang dasar-dasar investasi untuk pemula",
     createdAt: new Date("2025-01-15"),
     updatedAt: new Date("2025-01-15"),
   },
   {
     id: "2",
-    title: "Tips Investasi untuk Pemula",
-    category: "Tips & Trick",
-    author: "Jane Smith",
-    date: new Date("2025-01-14"),
-    content: "<p>Konten berita lengkap...</p>",
-    banner: "/banners/news-2.jpg",
+    title: "Workshop Trading Advanced",
+    speaker: "Jane Smith",
+    category: "premium",
+    date: new Date("2025-02-20"),
+    time: "14:00",
+    registrationLink: "https://example.com/register/2",
+    banner: "/banners/event-2.jpg",
+    description: "Workshop lanjutan tentang teknik trading",
     createdAt: new Date("2025-01-14"),
     updatedAt: new Date("2025-01-14"),
   },
 ];
 
-export default function NewsContainer() {
+export default function EventContainer() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
-  const [editingNews, setEditingNews] = useState<News | null>(null);
-  const [viewingNews, setViewingNews] = useState<News | null>(null);
-  const [deletingNews, setDeletingNews] = useState<News | null>(null);
-  const [news, setNews] = useState<News[]>(mockNews);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
+  const [events, setEvents] = useState<Event[]>(mockEvents);
 
-  const filteredNews = news.filter((item) => {
+  const filteredEvents = events.filter((item) => {
     const matchesSearch =
       search === "" ||
       item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.author.toLowerCase().includes(search.toLowerCase());
+      item.speaker.toLowerCase().includes(search.toLowerCase()) ||
+      item.description.toLowerCase().includes(search.toLowerCase());
     const matchesCategory =
       !selectedCategory || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const columns: ColumnDef<News>[] = [
+  const columns: ColumnDef<Event>[] = [
     {
       accessorKey: "title",
       header: "Judul",
@@ -68,12 +73,20 @@ export default function NewsContainer() {
       ),
     },
     {
-      accessorKey: "category",
-      header: "Kategori",
+      accessorKey: "speaker",
+      header: "Pembicara",
     },
     {
-      accessorKey: "author",
-      header: "Author",
+      accessorKey: "category",
+      header: "Kategori",
+      cell: ({ row }) => {
+        const category = row.original.category;
+        return (
+          <span className="capitalize">
+            {category === "gratis" ? "Gratis" : "Premium"}
+          </span>
+        );
+      },
     },
     {
       accessorKey: "date",
@@ -86,6 +99,10 @@ export default function NewsContainer() {
           year: "numeric",
         });
       },
+    },
+    {
+      accessorKey: "time",
+      header: "Waktu",
     },
     {
       accessorKey: "updatedAt",
@@ -109,21 +126,21 @@ export default function NewsContainer() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setViewingNews(row.original)}
+            onClick={() => setViewingEvent(row.original)}
           >
             <Icon icon="lucide:eye" className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingNews(row.original)}
+            onClick={() => setEditingEvent(row.original)}
           >
             <Icon icon="lucide:pencil" className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setDeletingNews(row.original)}
+            onClick={() => setDeletingEvent(row.original)}
           >
             <Icon icon="lucide:trash" className="text-destructive h-4 w-4" />
           </Button>
@@ -132,55 +149,57 @@ export default function NewsContainer() {
     },
   ];
 
-  const handleCreate = (data: NewsFormData) => {
-    const newNews: News = {
+  const handleCreate = (data: EventFormData) => {
+    const newEvent: Event = {
       title: data.title,
+      speaker: data.speaker,
       category: data.category,
-      author: data.author,
       date: typeof data.date === "string" ? new Date(data.date) : data.date,
-      content: data.content,
+      time: data.time,
+      registrationLink: data.registrationLink,
       banner:
         typeof data.banner === "string"
           ? data.banner
           : URL.createObjectURL(data.banner),
+      description: data.description,
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    setNews([newNews, ...news]);
+    setEvents([newEvent, ...events]);
     setIsCreateDialogOpen(false);
   };
 
-  const handleEdit = (data: Omit<News, "id" | "createdAt">) => {
-    if (!editingNews) return;
-    setNews(
-      news.map((item) =>
-        item.id === editingNews.id
+  const handleEdit = (data: Omit<Event, "id" | "createdAt">) => {
+    if (!editingEvent) return;
+    setEvents(
+      events.map((item) =>
+        item.id === editingEvent.id
           ? {
               ...data,
-              id: editingNews.id,
-              createdAt: editingNews.createdAt,
+              id: editingEvent.id,
+              createdAt: editingEvent.createdAt,
               updatedAt: new Date(),
             }
           : item,
       ),
     );
-    setEditingNews(null);
+    setEditingEvent(null);
   };
 
   const handleDelete = () => {
-    if (!deletingNews) return;
-    setNews(news.filter((item) => item.id !== deletingNews.id));
-    setDeletingNews(null);
+    if (!deletingEvent) return;
+    setEvents(events.filter((item) => item.id !== deletingEvent.id));
+    setDeletingEvent(null);
   };
 
   return (
     <div className="bg-background space-y-6 rounded-lg p-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">News Management</h1>
+        <h1 className="text-2xl font-bold">Event Management</h1>
         <p className="text-muted-foreground">
-          Kelola berita dan artikel dengan mudah.
+          Kelola event dan webinar dengan mudah.
         </p>
       </div>
 
@@ -192,7 +211,7 @@ export default function NewsContainer() {
             className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
           />
           <Input
-            placeholder="Search by title, author..."
+            placeholder="Search by title, speaker, description..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -204,37 +223,37 @@ export default function NewsContainer() {
         </Button>
         <Button variant="default" onClick={() => setIsCreateDialogOpen(true)}>
           <Icon icon="lucide:plus" className="mr-2 h-4 w-4" />
-          Add News
+          Add Event
         </Button>
       </div>
 
       {/* Data Table */}
-      <DataTable data={filteredNews} columns={columns} rowsPerPage={10} />
+      <DataTable data={filteredEvents} columns={columns} rowsPerPage={10} />
 
       {/* Dialogs */}
-      <CreateNewsDialog
+      <CreateEventDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSubmit={handleCreate}
       />
-      <EditNewsDialog
-        open={!!editingNews}
-        onOpenChange={(open) => !open && setEditingNews(null)}
-        news={editingNews}
+      <EditEventDialog
+        open={!!editingEvent}
+        onOpenChange={(open) => !open && setEditingEvent(null)}
+        event={editingEvent}
         onSubmit={handleEdit}
       />
-      <ViewNewsDialog
-        open={!!viewingNews}
-        onOpenChange={(open) => !open && setViewingNews(null)}
-        news={viewingNews}
+      <ViewEventDialog
+        open={!!viewingEvent}
+        onOpenChange={(open) => !open && setViewingEvent(null)}
+        event={viewingEvent}
       />
-      <DeleteNewsDialog
-        open={!!deletingNews}
-        onOpenChange={(open) => !open && setDeletingNews(null)}
-        news={deletingNews}
+      <DeleteEventDialog
+        open={!!deletingEvent}
+        onOpenChange={(open) => !open && setDeletingEvent(null)}
+        event={deletingEvent}
         onConfirm={handleDelete}
       />
-      <FilterNewsDialog
+      <FilterEventDialog
         open={isFilterDialogOpen}
         onOpenChange={setIsFilterDialogOpen}
         selectedCategory={selectedCategory}
