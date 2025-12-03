@@ -3,20 +3,13 @@ import { ProgressBar } from "@/components/progress-bar";
 import { TConfig } from "@/stores/config";
 import { env } from "@/constants/env";
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import "@/styles/globals.css";
 import "@bprogress/core/css";
 
-const fontInter = Inter({
-  variable: "--font-inter",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const fontPoppins = Poppins({
-  variable: "--font-poppins",
+const fontGeist = Geist({
+  variable: "--font-geist",
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
@@ -65,9 +58,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body
-        className={`${fontInter.variable} ${fontPoppins.variable} font-inter antialiased`}
-      >
+      <body className={`${fontGeist.variable} font-geist antialiased`}>
         <Suspense fallback={null}>
           <ProgressBar />
         </Suspense>

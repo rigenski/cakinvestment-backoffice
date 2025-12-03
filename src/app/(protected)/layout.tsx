@@ -4,6 +4,9 @@ import { getSession } from "@/utils/session";
 import { redirect } from "next/navigation";
 import React from "react";
 import Providers from "./_components/providers";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "./_components/app-sidebar";
+import AppBar from "./_components/app-bar";
 
 type TLayoutProps = {
   children: React.ReactNode;
@@ -39,7 +42,15 @@ export default async function Layout({ children }: TLayoutProps) {
         user: user,
       }}
     >
-      {children}
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <AppBar />
+          <section className="flex max-w-full min-w-0 flex-1 flex-col gap-4 overflow-x-hidden bg-[#FAFAFA] p-4">
+            {children}
+          </section>
+        </SidebarInset>
+      </SidebarProvider>
     </Providers>
   );
 }
