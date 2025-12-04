@@ -17,27 +17,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { MemberType, ParticipantStatus } from "../../types";
+import { WithdrawalStatus } from "../../types";
 
-interface FilterParticipantDialogProps {
+interface FilterWithdrawalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedMemberType: MemberType | null;
-  selectedStatus: ParticipantStatus | null;
-  onMemberTypeChange: (memberType: MemberType | null) => void;
-  onStatusChange: (status: ParticipantStatus | null) => void;
+  selectedStatus: WithdrawalStatus | null;
+  onStatusChange: (status: WithdrawalStatus | null) => void;
 }
 
-export function FilterParticipantDialog({
+export function FilterWithdrawalDialog({
   open,
   onOpenChange,
-  selectedMemberType,
   selectedStatus,
-  onMemberTypeChange,
   onStatusChange,
-}: FilterParticipantDialogProps) {
+}: FilterWithdrawalDialogProps) {
   const handleClear = () => {
-    onMemberTypeChange(null);
     onStatusChange(null);
   };
 
@@ -45,36 +40,18 @@ export function FilterParticipantDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Filter Participant</DialogTitle>
+          <DialogTitle>Filter Withdrawal</DialogTitle>
           <DialogDescription>
-            Filter participant berdasarkan tipe member dan status
+            Filter withdrawal berdasarkan status
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="memberType">Tipe Member</Label>
-            <Select
-              value={selectedMemberType || "all"}
-              onValueChange={(value) =>
-                onMemberTypeChange(value === "all" ? null : (value as MemberType))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih tipe member" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Tipe Member</SelectItem>
-                <SelectItem value="Active Member">Active Member</SelectItem>
-                <SelectItem value="Member">Member</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={selectedStatus || "all"}
               onValueChange={(value) =>
-                onStatusChange(value === "all" ? null : (value as ParticipantStatus))
+                onStatusChange(value === "all" ? null : (value as WithdrawalStatus))
               }
             >
               <SelectTrigger className="w-full">
@@ -82,8 +59,9 @@ export function FilterParticipantDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -100,5 +78,4 @@ export function FilterParticipantDialog({
     </Dialog>
   );
 }
-
 
