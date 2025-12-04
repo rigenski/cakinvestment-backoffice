@@ -7,9 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Icon } from "@iconify/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
-import { Transaction } from "../types";
+import { Transaction, TransactionStatus } from "../types";
 import { DeleteTransactionDialog } from "./dialogs/delete-transaction-dialog";
 import { ViewTransactionDialog } from "./dialogs/view-transaction-dialog";
+import { FilterTransactionDialog } from "./dialogs/filter-transaction-dialog";
 
 // Mock data - replace with actual API call
 const mockTransactions: Transaction[] = [
@@ -68,9 +69,15 @@ const mockTransactions: Transaction[] = [
 
 export default function TransactionContainer() {
   const [search, setSearch] = useState("");
-  const [viewingTransaction, setViewingTransaction] = useState<Transaction | null>(null);
-  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const [selectedStatus, setSelectedStatus] =
+    useState<TransactionStatus | null>(null);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [viewingTransaction, setViewingTransaction] =
+    useState<Transaction | null>(null);
+  const [deletingTransaction, setDeletingTransaction] =
+    useState<Transaction | null>(null);
+  const [transactions, setTransactions] =
+    useState<Transaction[]>(mockTransactions);
 
   const filteredTransactions = transactions.filter((item) => {
     const matchesSearch =
@@ -79,21 +86,36 @@ export default function TransactionContainer() {
       item.userName.toLowerCase().includes(search.toLowerCase()) ||
       item.userEmail.toLowerCase().includes(search.toLowerCase()) ||
       item.planName.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
+    const matchesStatus = !selectedStatus || item.status === selectedStatus;
+    return matchesSearch && matchesStatus;
   });
 
   // Calculate summary
   const summary = useMemo(() => {
     const totalTransaction = transactions.length;
-    const totalSuccess = transactions.filter((t) => t.status === "completed").length;
-    const totalPending = transactions.filter((t) => t.status === "pending").length;
-    const totalCanceled = transactions.filter((t) => t.status === "canceled").length;
+    const totalSuccess = transactions.filter(
+      (t) => t.status === "completed",
+    ).length;
+    const totalPending = transactions.filter(
+      (t) => t.status === "pending",
+    ).length;
+    const totalCanceled = transactions.filter(
+      (t) => t.status === "canceled",
+    ).length;
     const totalRevenue = transactions
       .filter((t) => t.status === "completed")
       .reduce((sum, t) => sum + t.total, 0);
     const totalDiscount = transactions
       .filter((t) => t.status === "completed")
       .reduce((sum, t) => sum + t.discount, 0);
+    const successRate =
+      totalTransaction > 0
+        ? ((totalSuccess / totalTransaction) * 100).toFixed(1)
+        : "0";
+    const canceledRate =
+      totalTransaction > 0
+        ? ((totalCanceled / totalTransaction) * 100).toFixed(1)
+        : "0";
 
     return {
       totalTransaction,
@@ -102,6 +124,8 @@ export default function TransactionContainer() {
       totalCanceled,
       totalRevenue,
       totalDiscount,
+      successRate,
+      canceledRate,
     };
   }, [transactions]);
 
@@ -131,7 +155,9 @@ export default function TransactionContainer() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.userName}</div>
-          <div className="text-muted-foreground text-xs">{row.original.userEmail}</div>
+          <div className="text-muted-foreground text-xs">
+            {row.original.userEmail}
+          </div>
         </div>
       ),
     },
@@ -201,7 +227,9 @@ export default function TransactionContainer() {
         };
         const config = statusConfig[status];
         return (
-          <span className={`rounded-full px-3 py-1 text-xs ${config.className}`}>
+          <span
+            className={`rounded-full px-3 py-1 text-xs ${config.className}`}
+          >
             {config.label}
           </span>
         );
@@ -233,7 +261,9 @@ export default function TransactionContainer() {
 
   const handleDelete = () => {
     if (!deletingTransaction) return;
-    setTransactions(transactions.filter((item) => item.id !== deletingTransaction.id));
+    setTransactions(
+      transactions.filter((item) => item.id !== deletingTransaction.id),
+    );
     setDeletingTransaction(null);
   };
 
@@ -248,74 +278,114 @@ export default function TransactionContainer() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <div className="flex items-center justify-between p-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Transaction</p>
-              <p className="text-2xl font-bold">{summary.totalTransaction}</p>
+              <p className="text-muted-foreground text-xs">Total Transaction</p>
+              <p className="text-lg font-bold">{summary.totalTransaction}</p>
             </div>
-            <Icon icon="lucide:receipt" className="h-8 w-8 text-blue-500" />
+            <Icon icon="lucide:receipt" className="h-6 w-6 text-blue-500" />
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between p-4">
+
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Sukses</p>
-              <p className="text-2xl font-bold text-green-600">{summary.totalSuccess}</p>
+              <p className="text-muted-foreground text-xs">Total Pending</p>
+              <p className="text-lg font-bold text-yellow-600">
+                {summary.totalPending}
+              </p>
             </div>
-            <Icon icon="lucide:check-circle" className="h-8 w-8 text-green-500" />
+            <Icon icon="lucide:clock" className="h-6 w-6 text-yellow-500" />
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between p-4">
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{summary.totalPending}</p>
+              <p className="text-muted-foreground text-xs">Total Sukses</p>
+              <p className="text-lg font-bold text-green-600">
+                {summary.totalSuccess}
+              </p>
             </div>
-            <Icon icon="lucide:clock" className="h-8 w-8 text-yellow-500" />
+            <Icon
+              icon="lucide:check-circle"
+              className="h-6 w-6 text-green-500"
+            />
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between p-4">
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Canceled</p>
-              <p className="text-2xl font-bold text-red-600">{summary.totalCanceled}</p>
+              <p className="text-muted-foreground text-xs">Total Canceled</p>
+              <p className="text-lg font-bold text-red-600">
+                {summary.totalCanceled}
+              </p>
             </div>
-            <Icon icon="lucide:x-circle" className="h-8 w-8 text-red-500" />
+            <Icon icon="lucide:x-circle" className="h-6 w-6 text-red-500" />
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between p-4">
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Revenue</p>
-              <p className="text-xl font-bold text-green-600">
+              <p className="text-muted-foreground text-xs">Total Revenue</p>
+              <p className="text-sm font-bold text-green-600">
                 {new Intl.NumberFormat("id-ID", {
                   style: "currency",
                   currency: "IDR",
+                  maximumFractionDigits: 0,
                 }).format(summary.totalRevenue)}
               </p>
             </div>
-            <Icon icon="lucide:dollar-sign" className="h-8 w-8 text-green-500" />
+            <Icon
+              icon="lucide:dollar-sign"
+              className="h-6 w-6 text-green-500"
+            />
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between p-4">
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
             <div>
-              <p className="text-muted-foreground text-sm">Total Diskon</p>
-              <p className="text-xl font-bold text-blue-600">
+              <p className="text-muted-foreground text-xs">Total Diskon</p>
+              <p className="text-sm font-bold text-blue-600">
                 {new Intl.NumberFormat("id-ID", {
                   style: "currency",
                   currency: "IDR",
+                  maximumFractionDigits: 0,
                 }).format(summary.totalDiscount)}
               </p>
             </div>
-            <Icon icon="lucide:tag" className="h-8 w-8 text-blue-500" />
+            <Icon icon="lucide:tag" className="h-6 w-6 text-blue-500" />
+          </div>
+        </Card>
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
+            <div>
+              <p className="text-muted-foreground text-xs">Success Rate</p>
+              <p className="text-lg font-bold text-green-600">
+                {summary.successRate}%
+              </p>
+            </div>
+            <Icon
+              icon="lucide:trending-up"
+              className="h-6 w-6 text-green-500"
+            />
+          </div>
+        </Card>
+        <Card className="!py-2">
+          <div className="flex items-center justify-between p-3">
+            <div>
+              <p className="text-muted-foreground text-xs">Canceled Rate</p>
+              <p className="text-lg font-bold text-red-600">
+                {summary.canceledRate}%
+              </p>
+            </div>
+            <Icon icon="lucide:alert-circle" className="h-6 w-6 text-red-500" />
           </div>
         </Card>
       </div>
 
-      {/* Search */}
+      {/* Search and Actions */}
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Icon
@@ -329,10 +399,18 @@ export default function TransactionContainer() {
             className="pl-10"
           />
         </div>
+        <Button variant="outline" onClick={() => setIsFilterDialogOpen(true)}>
+          <Icon icon="lucide:filter" className="mr-2 h-4 w-4" />
+          Filter
+        </Button>
       </div>
 
       {/* Data Table */}
-      <DataTable data={filteredTransactions} columns={columns} rowsPerPage={10} />
+      <DataTable
+        data={filteredTransactions}
+        columns={columns}
+        rowsPerPage={10}
+      />
 
       {/* Dialogs */}
       <ViewTransactionDialog
@@ -346,7 +424,12 @@ export default function TransactionContainer() {
         transaction={deletingTransaction}
         onConfirm={handleDelete}
       />
+      <FilterTransactionDialog
+        open={isFilterDialogOpen}
+        onOpenChange={setIsFilterDialogOpen}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+      />
     </div>
   );
 }
-
