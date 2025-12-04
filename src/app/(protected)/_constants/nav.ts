@@ -74,4 +74,36 @@ export const NAV_ITEMS = [
       },
     ],
   },
+  {
+    title: "MASTERCLASS",
+    url: "#",
+    isSection: true,
+    items: [
+      {
+        title: "Plan",
+        url: "/masterclass/plan",
+        icon: "lucide:package",
+      },
+      {
+        title: "Promo",
+        url: "/masterclass/promo",
+        icon: "lucide:percent",
+      },
+      {
+        title: "Participant",
+        url: "/masterclass/participant",
+        icon: "lucide:users",
+      },
+      {
+        title: "Transaction",
+        url: "/masterclass/transaction",
+        icon: "lucide:credit-card",
+      },
+      {
+        title: "Config",
+        url: "/masterclass/config",
+        icon: "lucide:settings",
+      },
+    ],
+  },
 ];
