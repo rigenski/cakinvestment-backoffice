@@ -7,14 +7,15 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install pnpm globally
-RUN npm install -g pnpm@latest
+# Install pnpm globally and use it in the same command to ensure it's available
+RUN npm install -g pnpm@latest && \
+    npm list -g pnpm
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies using full path to pnpm
-RUN /usr/local/bin/pnpm install --frozen-lockfile
+# Install dependencies using npx (which will find pnpm from npm global install)
+RUN npx pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -32,8 +33,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
-# Build the application using full path to pnpm
-RUN /usr/local/bin/pnpm build
+# Build the application using npx (which will find pnpm from npm global install)
+RUN npx pnpm build
 
 # Production image, copy all the files and run next
 FROM base AS runner

@@ -7,11 +7,11 @@ nixPkgs = ["nodejs_20"]
 [phases.install]
 cmds = [
   "npm install -g pnpm@latest",
-  "/usr/local/bin/pnpm install --frozen-lockfile"
+  "npx pnpm install --frozen-lockfile"
 ]
 
 [phases.build]
-cmds = ["/usr/local/bin/pnpm run build"]
+cmds = ["npx pnpm run build"]
 
 [start]
 cmd = "node server.js"
