@@ -1,13 +1,14 @@
 [variables]
 NODE_VERSION = "20"
+PNPM_HOME = "/root/.local/share/pnpm"
+PATH = "/root/.local/share/pnpm:$PATH"
 
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+nixPkgs = ["nodejs_20", "curl"]
 
 [phases.install]
 cmds = [
-  "corepack enable",
-  "corepack prepare pnpm@latest --activate",
+  "curl -fsSL https://get.pnpm.io/install.sh | sh -",
   "pnpm install --frozen-lockfile"
 ]
 
