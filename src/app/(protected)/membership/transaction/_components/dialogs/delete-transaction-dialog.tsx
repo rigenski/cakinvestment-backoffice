@@ -9,22 +9,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Module } from "../../types";
+import { Transaction } from "../../types";
 
-interface DeleteModuleDialogProps {
+interface DeleteTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  module: Module | null;
+  transaction: Transaction | null;
   onConfirm: () => void;
 }
 
-export function DeleteModuleDialog({
+export function DeleteTransactionDialog({
   open,
   onOpenChange,
-  module,
+  transaction,
   onConfirm,
-}: DeleteModuleDialogProps) {
-  if (!module) return null;
+}: DeleteTransactionDialogProps) {
+  if (!transaction) return null;
 
   const handleConfirm = () => {
     onConfirm();
@@ -35,9 +35,9 @@ export function DeleteModuleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Module</DialogTitle>
+          <DialogTitle>Delete Transaction</DialogTitle>
           <DialogDescription>
-            Apakah Anda yakin ingin menghapus modul "{module.title}"? Tindakan
+            Apakah Anda yakin ingin menghapus transaksi "{transaction.transactionId}"? Tindakan
             ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
@@ -53,7 +53,4 @@ export function DeleteModuleDialog({
     </Dialog>
   );
 }
-
-
-
 

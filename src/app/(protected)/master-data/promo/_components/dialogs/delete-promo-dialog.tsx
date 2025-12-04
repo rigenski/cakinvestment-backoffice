@@ -9,22 +9,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Module } from "../../types";
+import { Promo } from "../../types";
 
-interface DeleteModuleDialogProps {
+interface DeletePromoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  module: Module | null;
+  promo: Promo | null;
   onConfirm: () => void;
 }
 
-export function DeleteModuleDialog({
+export function DeletePromoDialog({
   open,
   onOpenChange,
-  module,
+  promo,
   onConfirm,
-}: DeleteModuleDialogProps) {
-  if (!module) return null;
+}: DeletePromoDialogProps) {
+  if (!promo) return null;
 
   const handleConfirm = () => {
     onConfirm();
@@ -35,9 +35,9 @@ export function DeleteModuleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Module</DialogTitle>
+          <DialogTitle>Delete Promo</DialogTitle>
           <DialogDescription>
-            Apakah Anda yakin ingin menghapus modul "{module.title}"? Tindakan
+            Apakah Anda yakin ingin menghapus promo "{promo.code}"? Tindakan
             ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
@@ -53,7 +53,4 @@ export function DeleteModuleDialog({
     </Dialog>
   );
 }
-
-
-
 

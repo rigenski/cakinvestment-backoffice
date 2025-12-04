@@ -43,6 +43,16 @@ export const NAV_ITEMS = [
     isSection: true,
     items: [
       {
+        title: "Plan",
+        url: "/master-data/plan",
+        icon: "lucide:package",
+      },
+      {
+        title: "Promo",
+        url: "/master-data/promo",
+        icon: "lucide:percent",
+      },
+      {
         title: "Participant",
         url: "/membership/participant",
         icon: "lucide:users",
@@ -56,16 +66,6 @@ export const NAV_ITEMS = [
         title: "Withdrawal",
         url: "/membership/withdrawal",
         icon: "lucide:wallet",
-      },
-      {
-        title: "Plan",
-        url: "/master-data/plan",
-        icon: "lucide:package",
-      },
-      {
-        title: "Promo",
-        url: "/master-data/promo",
-        icon: "lucide:percent",
       },
       {
         title: "Config",

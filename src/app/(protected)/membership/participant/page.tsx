@@ -1,9 +1,6 @@
 import Container from "./_components/container";
 
-export default function AkademiPage() {
+export default function ParticipantPage() {
   return <Container />;
 }
-
-
-
 

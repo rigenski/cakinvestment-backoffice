@@ -9,22 +9,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Module } from "../../types";
+import { Participant } from "../../types";
 
-interface DeleteModuleDialogProps {
+interface DeleteParticipantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  module: Module | null;
+  participant: Participant | null;
   onConfirm: () => void;
 }
 
-export function DeleteModuleDialog({
+export function DeleteParticipantDialog({
   open,
   onOpenChange,
-  module,
+  participant,
   onConfirm,
-}: DeleteModuleDialogProps) {
-  if (!module) return null;
+}: DeleteParticipantDialogProps) {
+  if (!participant) return null;
 
   const handleConfirm = () => {
     onConfirm();
@@ -35,9 +35,9 @@ export function DeleteModuleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Module</DialogTitle>
+          <DialogTitle>Delete Participant</DialogTitle>
           <DialogDescription>
-            Apakah Anda yakin ingin menghapus modul "{module.title}"? Tindakan
+            Apakah Anda yakin ingin menghapus participant "{participant.name}"? Tindakan
             ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
@@ -53,7 +53,4 @@ export function DeleteModuleDialog({
     </Dialog>
   );
 }
-
-
-
 
