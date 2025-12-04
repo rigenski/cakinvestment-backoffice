@@ -17,27 +17,27 @@ const fontGeist = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_FE_URL),
-  title: "Nodewave",
-  description: "Node Solusi Indonesia",
+  title: "CAK Investment Club",
+  description: "CAK Investment Club",
   openGraph: {
-    title: "Nodewave",
-    description: "Node Solusi Indonesia",
-    url: "https://nodewave.id",
+    title: "CAK Investment Club",
+    description: "CAK Investment Club",
+    url: "https://cakinvestmentclub.id",
     images: [
       {
         url: "/banner.png",
-        alt: "Nodewave",
+        alt: "CAK Investment Club",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nodewave",
-    description: "Node Solusi Indonesia",
+    title: "CAK Investment Club",
+    description: "CAK Investment Club",
     images: [
       {
         url: "/banner.png",
-        alt: "Nodewave",
+        alt: "CAK Investment Club",
       },
     ],
   },

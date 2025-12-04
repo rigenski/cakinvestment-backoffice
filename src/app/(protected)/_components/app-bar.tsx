@@ -36,9 +36,7 @@ export default function AppBar() {
       <div className="flex w-full items-center justify-between pr-6">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
-          <h2 className="-mb-0.5 text-lg font-semibold">
-            AI INVESTIGATIF JAMPIDSUS
-          </h2>
+          <h2 className="-mb-0.5 text-lg font-semibold">CAK INVESTMENT CLUB</h2>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
