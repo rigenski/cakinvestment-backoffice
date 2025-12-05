@@ -38,7 +38,18 @@ const promoFormSchema = z.object({
   validFrom: z.string().min(1, "Valid from harus diisi"),
   validUntil: z.string().min(1, "Valid until harus diisi"),
   usageLimit: z.number().min(1, "Usage limit harus diisi"),
-});
+}).refine(
+  (data) => {
+    if (data.discountType === "percentage" && data.discount > 100) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Diskon tidak boleh lebih dari 100%",
+    path: ["discount"],
+  }
+);
 
 interface CreatePromoDialogProps {
   open: boolean;
@@ -171,9 +182,17 @@ export function CreatePromoDialog({
                         <Input
                           type="number"
                           min="0"
+                          max={form.watch("discountType") === "percentage" ? 100 : undefined}
                           placeholder="Masukkan nilai diskon"
                           {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (form.watch("discountType") === "percentage" && val > 100) {
+                              field.onChange(100);
+                            } else {
+                              field.onChange(val || 0);
+                            }
+                          }}
                           required
                         />
                       </FormControl>

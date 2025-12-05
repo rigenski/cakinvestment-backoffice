@@ -207,7 +207,7 @@ export default function Container() {
         {/* Transaction Status Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Status Transaksi</CardTitle>
+            <CardTitle>Status Transaksi Membership</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
