@@ -7,15 +7,14 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install pnpm globally and use it in the same command to ensure it's available
-RUN npm install -g pnpm@latest && \
-    npm list -g pnpm
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies using npx (which will find pnpm from npm global install)
-RUN npx pnpm install --frozen-lockfile
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -24,24 +23,29 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install pnpm globally
-RUN npm install -g pnpm@latest
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+# Allow build to proceed even if env vars are not set (they'll be validated at runtime)
+ENV SKIP_ENV_VALIDATION=true
 
-# Build the application using npx (which will find pnpm from npm global install)
-RUN npx pnpm build
+# Build the application
+RUN pnpm build
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -50,7 +54,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 
 # Set the correct permission for prerender cache
-RUN mkdir .next
+RUN mkdir -p .next
 RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
@@ -62,7 +66,13 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
+# Healthcheck to ensure the server is running
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+# Use the server.js from the standalone output
+# The standalone output puts server.js in the root of the copied directory
 CMD ["node", "server.js"]
