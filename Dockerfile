@@ -59,20 +59,31 @@ RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
+# Copy standalone output (contains server.js and node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Copy static files
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy entrypoint script (as root, then set permissions)
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh && \
+    chown nextjs:nodejs /app/docker-entrypoint.sh
 
 USER nextjs
 
 EXPOSE 3000
 
+# Set default port and hostname
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+# Allow runtime to skip env validation if needed
+# Set this to "true" in Dokploy if environment variables are not available
+ENV SKIP_ENV_VALIDATION=false
 
 # Healthcheck to ensure the server is running
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+# Increased start period to allow app to fully start
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
-# Use the server.js from the standalone output
-# The standalone output puts server.js in the root of the copied directory
-CMD ["node", "server.js"]
+# Use the entrypoint script for better error handling and debugging
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
