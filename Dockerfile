@@ -33,9 +33,6 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Generate Prisma Client explicitly before build
-RUN pnpm prisma generate
-
 # Build the application
 RUN pnpm build
 
@@ -66,13 +63,6 @@ RUN chown nextjs:nodejs .next
 # The standalone folder contains server.js at its root
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy Prisma generated client (custom output location)
-COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
-
-# Copy Prisma binaries and client from node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 # Verify server.js exists before switching user
 RUN ls -la server.js || (echo "ERROR: server.js not found after copy!" && ls -la && exit 1)
