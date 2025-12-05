@@ -12,11 +12,9 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "npx pnpm prisma generate",
   "npx pnpm run build",
   "cp -r public .next/standalone/",
-  "cp -r .next/static .next/standalone/.next/",
-     "cp -r prisma .next/standalone/"
+  "cp -r .next/static .next/standalone/.next/"
 ]
 
 [start]
