@@ -5,3 +5,4 @@ export interface SEOConfig {
   metaPixelId: string;
 }
 
+

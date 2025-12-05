@@ -47,15 +47,15 @@ const mockData = {
   },
 };
 
-// Revenue data for last 7 days
+// Revenue data for last 7 days (Membership only)
 const revenueData = [
-  { date: "Sen", membership: 15000000, masterclass: 8000000 },
-  { date: "Sel", membership: 18000000, masterclass: 9500000 },
-  { date: "Rab", membership: 22000000, masterclass: 11000000 },
-  { date: "Kam", membership: 25000000, masterclass: 12000000 },
-  { date: "Jum", membership: 20000000, masterclass: 10000000 },
-  { date: "Sab", membership: 15000000, masterclass: 7500000 },
-  { date: "Min", membership: 10000000, masterclass: 5000000 },
+  { date: "Sen", membership: 15000000 },
+  { date: "Sel", membership: 18000000 },
+  { date: "Rab", membership: 22000000 },
+  { date: "Kam", membership: 25000000 },
+  { date: "Jum", membership: 20000000 },
+  { date: "Sab", membership: 15000000 },
+  { date: "Min", membership: 10000000 },
 ];
 
 // Transaction status data
@@ -65,13 +65,13 @@ const transactionStatusData = [
   { name: "Canceled", value: mockData.membership.transactions.canceled + mockData.masterclass.transactions.canceled, color: "#ef4444" },
 ];
 
-// Participants growth data
+// Participants growth data (Membership only)
 const participantsData = [
-  { month: "Jan", membership: 120, masterclass: 65 },
-  { month: "Feb", membership: 135, masterclass: 72 },
-  { month: "Mar", membership: 145, masterclass: 78 },
-  { month: "Apr", membership: 150, masterclass: 82 },
-  { month: "Mei", membership: 156, masterclass: 89 },
+  { month: "Jan", membership: 120 },
+  { month: "Feb", membership: 135 },
+  { month: "Mar", membership: 145 },
+  { month: "Apr", membership: 150 },
+  { month: "Mei", membership: 156 },
 ];
 
 const totalRevenue =
@@ -167,7 +167,7 @@ export default function Container() {
         {/* Revenue Trend Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Trend (7 Hari Terakhir)</CardTitle>
+            <CardTitle>Revenue Trend Membership (7 Hari Terakhir)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -191,24 +191,13 @@ export default function Container() {
                     }).format(value)
                   }
                 />
-                <Legend />
                 <Area
                   type="monotone"
                   dataKey="membership"
-                  stackId="1"
                   stroke="#2563eb"
                   fill="#2563eb"
                   fillOpacity={0.6}
                   name="Membership"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="masterclass"
-                  stackId="1"
-                  stroke="#10b981"
-                  fill="#10b981"
-                  fillOpacity={0.6}
-                  name="Masterclass"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -229,7 +218,7 @@ export default function Container() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
+                    `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
                   outerRadius={100}
                   fill="#8884d8"
@@ -250,7 +239,7 @@ export default function Container() {
       {/* Participants Growth Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Pertumbuhan Participants (5 Bulan Terakhir)</CardTitle>
+          <CardTitle>Pertumbuhan Participants Membership (5 Bulan Terakhir)</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -259,20 +248,12 @@ export default function Container() {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Legend />
               <Line
                 type="monotone"
                 dataKey="membership"
                 stroke="#2563eb"
                 strokeWidth={2}
                 name="Membership"
-              />
-              <Line
-                type="monotone"
-                dataKey="masterclass"
-                stroke="#10b981"
-                strokeWidth={2}
-                name="Masterclass"
               />
             </LineChart>
           </ResponsiveContainer>
